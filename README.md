@@ -1,4 +1,4 @@
-# query
+# query [![Build Status](https://travis-ci.org/inappcloud/query.svg?branch=master)](https://travis-ci.org/inappcloud/query)
 
 SQL Query Builder in Go.
 

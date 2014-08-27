@@ -64,14 +64,22 @@ func Between(key string, min interface{}, max interface{}) *Condition {
 	return &Condition{fmt.Sprintf("%s BETWEEN ? AND ?", key), []interface{}{min, max}}
 }
 
-func In(key string, value []interface{}) *Condition {
-	placeholders := strings.Repeat("?,", len(value))
-	return &Condition{fmt.Sprintf("%s IN (%s)", key, placeholders[:len(placeholders)-1]), value}
+func In(key string, values ...interface{}) *Condition {
+	if len(values) == 0 {
+		return &Condition{params: []interface{}{}}
+	}
+
+	placeholders := strings.Repeat("?,", len(values))
+	return &Condition{fmt.Sprintf("%s IN (%s)", key, placeholders[:len(placeholders)-1]), values}
 }
 
-func Nin(key string, value []interface{}) *Condition {
-	placeholders := strings.Repeat("?,", len(value))
-	return &Condition{fmt.Sprintf("%s NOT IN (%s)", key, placeholders[:len(placeholders)-1]), value}
+func Nin(key string, values ...interface{}) *Condition {
+	if len(values) == 0 {
+		return &Condition{params: []interface{}{}}
+	}
+
+	placeholders := strings.Repeat("?,", len(values))
+	return &Condition{fmt.Sprintf("%s NOT IN (%s)", key, placeholders[:len(placeholders)-1]), values}
 }
 
 func Or(conditions ...*Condition) *Condition {
@@ -191,11 +199,21 @@ func addCondition(k string, v interface{}) *Condition {
 				conds = append(conds, Lte(k, val))
 			}
 
-			// FIX: What if val is not an array or has less or more items than 2?
-			// if val, ok := typ["$between"]; ok {
-			// 	values := val.([]interface{})
-			// 	conds = append(conds, Between(k, values[0], values[1]))
-			// }
+			if val, ok := typ["$between"]; ok {
+				values := val.([]interface{})
+
+				if len(values) == 2 {
+					conds = append(conds, Between(k, values[0], values[1]))
+				}
+			}
+
+			if val, ok := typ["$in"]; ok {
+				conds = append(conds, In(k, val.([]interface{})...))
+			}
+
+			if val, ok := typ["$nin"]; ok {
+				conds = append(conds, Nin(k, val.([]interface{})...))
+			}
 
 			return And(conds...)
 		default:

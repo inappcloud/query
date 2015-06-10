@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/inappcloud/query/where"
 )
@@ -16,9 +17,9 @@ type selectQuery struct {
 	conditions *where.Condition
 }
 
-func (q *selectQuery) Fields(fields string) *selectQuery {
-	if fields != "" {
-		q.fields = fields
+func (q *selectQuery) Fields(fields []string) *selectQuery {
+	if len(fields) > 0 {
+		q.fields = strings.Join(fields, ",")
 	}
 
 	return q

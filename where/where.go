@@ -126,6 +126,10 @@ func And(conditions ...*Condition) *Condition {
 	return condition
 }
 
+func FromMap(where map[string]interface{}) *Condition {
+	return addAndCondition(where)
+}
+
 func Parse(v string) *Condition {
 	if v == "" {
 		return new(Condition)

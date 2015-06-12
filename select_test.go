@@ -26,4 +26,6 @@ func TestSelect(t *testing.T) {
 	eq(t, "SELECT * FROM teas", query.Select("teas").Where(nil).String())
 	eq(t, "SELECT * FROM teas WHERE name = $1", query.Select("teas").Where(where.Eq("name", "yame")).String())
 	eq(t, []interface{}{"yame"}, query.Select("teas").Where(where.Eq("name", "yame")).Params())
+
+	eq(t, "SELECT * FROM teas ORDER BY name DESC, id ASC", query.Select("teas").Sort(map[string]int{"name": -1, "id": 1}).String())
 }

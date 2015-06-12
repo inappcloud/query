@@ -15,6 +15,7 @@ type selectQuery struct {
 	limit      int
 	offset     int
 	conditions *where.Condition
+	sort       string
 }
 
 func (q *selectQuery) Fields(fields []string) *selectQuery {
@@ -56,6 +57,23 @@ func (q *selectQuery) Where(c *where.Condition) *selectQuery {
 	return q
 }
 
+func (q *selectQuery) Sort(sortMap map[string]int) *selectQuery {
+	sortArr := []string{}
+
+	for key, order := range sortMap {
+		card := "ASC"
+		if order == -1 {
+			card = "DESC"
+		}
+
+		sortArr = append(sortArr, fmt.Sprintf("%s %s", key, card))
+	}
+
+	q.sort = strings.Join(sortArr, ", ")
+
+	return q
+}
+
 func (q *selectQuery) String() string {
 	buf := bytes.NewBufferString(fmt.Sprintf("SELECT %s FROM %s", q.fields, q.table))
 
@@ -71,6 +89,10 @@ func (q *selectQuery) String() string {
 		buf.WriteString(fmt.Sprintf(" WHERE %s", q.conditions.String()))
 	}
 
+	if q.sort != "" {
+		buf.WriteString(fmt.Sprintf(" ORDER BY %s", q.sort))
+	}
+
 	return replacePlaceholders(buf.String())
 }
 
@@ -79,5 +101,5 @@ func (q *selectQuery) Params() []interface{} {
 }
 
 func Select(table string) *selectQuery {
-	return &selectQuery{table, "*", 0, 0, nil}
+	return &selectQuery{table, "*", 0, 0, nil, ""}
 }

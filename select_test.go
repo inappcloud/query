@@ -28,4 +28,6 @@ func TestSelect(t *testing.T) {
 	eq(t, []interface{}{"yame"}, query.Select("teas").Where(where.Eq("name", "yame")).Params())
 
 	eq(t, "SELECT * FROM teas ORDER BY name DESC, id ASC", query.Select("teas").Sort(map[string]int{"name": -1, "id": 1}).String())
+
+	eq(t, "SELECT COUNT(*) FROM teas", query.Select("teas").Count())
 }

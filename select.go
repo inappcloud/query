@@ -77,6 +77,14 @@ func (q *selectQuery) Sort(sortMap map[string]int) *selectQuery {
 func (q *selectQuery) String() string {
 	buf := bytes.NewBufferString(fmt.Sprintf("SELECT %s FROM %s", q.fields, q.table))
 
+	if q.conditions != nil && len(q.conditions.String()) > 0 {
+		buf.WriteString(fmt.Sprintf(" WHERE %s", q.conditions.String()))
+	}
+
+	if q.sort != "" {
+		buf.WriteString(fmt.Sprintf(" ORDER BY %s", q.sort))
+	}
+
 	if q.limit > 0 {
 		buf.WriteString(fmt.Sprintf(" LIMIT %d", q.limit))
 	}
@@ -85,12 +93,14 @@ func (q *selectQuery) String() string {
 		buf.WriteString(fmt.Sprintf(" OFFSET %d", q.offset))
 	}
 
+	return replacePlaceholders(buf.String())
+}
+
+func (q *selectQuery) Count() string {
+	buf := bytes.NewBufferString(fmt.Sprintf("SELECT COUNT(*) FROM %s", q.table))
+
 	if q.conditions != nil && len(q.conditions.String()) > 0 {
 		buf.WriteString(fmt.Sprintf(" WHERE %s", q.conditions.String()))
-	}
-
-	if q.sort != "" {
-		buf.WriteString(fmt.Sprintf(" ORDER BY %s", q.sort))
 	}
 
 	return replacePlaceholders(buf.String())
